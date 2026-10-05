@@ -45,7 +45,16 @@ const LoginModal: FC = () => {
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify({ email, password, name }),
 				})
-				const data = await res.json()
+				const text = await res.text()
+				let data: any = {}
+				try {
+					data = JSON.parse(text)
+				} catch {
+					console.error("DEBUG FETCH ERROR:", res.url, res.status, text)
+					throw new Error(
+						`Lỗi (${res.status}): ${text.replace(/<[^>]*>/g, " ").trim().slice(0, 100) || text.slice(0, 100) || "Không có phản hồi"} [URL: ${res.url}]`,
+					)
+				}
 
 				if (!res.ok) {
 					throw new Error(data.message || "Đăng ký thất bại")
@@ -62,7 +71,16 @@ const LoginModal: FC = () => {
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify({ email, password }),
 				})
-				const data = await res.json()
+				const text = await res.text()
+				let data: any = {}
+				try {
+					data = JSON.parse(text)
+				} catch {
+					console.error("DEBUG FETCH ERROR:", res.url, res.status, text)
+					throw new Error(
+						`Lỗi (${res.status}): ${text.replace(/<[^>]*>/g, " ").trim().slice(0, 100) || text.slice(0, 100) || "Không có phản hồi"} [URL: ${res.url}]`,
+					)
+				}
 
 				if (!res.ok) {
 					throw new Error(data.message || "Tài khoản hoặc mật khẩu không chính xác")
@@ -101,7 +119,16 @@ const LoginModal: FC = () => {
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ credential: response.credential }),
 			})
-			const data = await res.json()
+			const text = await res.text()
+			let data: any = {}
+			try {
+				data = JSON.parse(text)
+			} catch {
+				console.error("DEBUG FETCH ERROR:", res.url, res.status, text)
+				throw new Error(
+					`Lỗi (${res.status}): ${text.replace(/<[^>]*>/g, " ").trim().slice(0, 100) || text.slice(0, 100) || "Không có phản hồi"} [URL: ${res.url}]`,
+				)
+			}
 			if (!res.ok) {
 				throw new Error(data.message || "Đăng nhập Google thất bại")
 			}
