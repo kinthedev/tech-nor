@@ -6,6 +6,7 @@ import { useAppDispatch } from "../redux/hooks"
 import {
 	updateNewList,
 	updateFeaturedList,
+	addCategories,
 } from "../redux/features/productSlice"
 import { type Product } from "../models/Product"
 import LatestProducts from "../components/LatestProducts"
@@ -16,39 +17,52 @@ const Home: FC = () => {
 	const dispatch = useAppDispatch()
 
 	useEffect(() => {
-		const fetchProducts = () => {
-			fetch(`${API_ENDPOINTS.PRODUCTS}?limit=24`)
-				.then((res) => res.json())
-				.then(({ products }) => {
-					const productList: Product[] = []
-					products.forEach((product: Product) => {
-						productList.push({
-							id: product.id,
-							title: product.title,
-							images: product.images,
-							price: product.price,
-							rating: product.rating,
-							thumbnail: product.thumbnail,
-							description: product.description,
-							category: product.category,
-							discountPercentage: product.discountPercentage,
-						})
-					})
-					dispatch(updateFeaturedList(productList.slice(0, 8)))
-					dispatch(updateNewList(productList.slice(8, 16)))
-				})
+		const fetchProductsAndCategories = async () => {
+			try {
+				// Lấy sản phẩm từ Backend Database
+				const prodRes = await fetch(`${API_ENDPOINTS.PRODUCTS}?limit=24`)
+				const prodData = await prodRes.json()
+				const rawProducts = prodData.products || prodData.data || []
+
+				const productList: Product[] = rawProducts.map((p: any) => ({
+					id: p.id,
+					title: p.title,
+					image: p.image,
+					price: Number(p.price),
+					rating: p.rating,
+					thumbnail: p.thumbnail || p.image,
+					description: p.description,
+					category: p.category,
+					brand: p.brand,
+					stock: p.stock,
+					discountPercentage: p.discountPercentage,
+				}))
+
+				dispatch(updateFeaturedList(productList.slice(0, 8)))
+				dispatch(updateNewList(productList.slice(8, 16)))
+
+				// Lấy danh mục từ Backend Database
+				const catRes = await fetch(API_ENDPOINTS.PRODUCTS_CATEGORIES)
+				const catData = await catRes.json()
+				if (Array.isArray(catData)) {
+					dispatch(addCategories(catData))
+				}
+			} catch (err) {
+				console.error("Lỗi khi tải dữ liệu trang chủ:", err)
+			}
 		}
-		fetchProducts()
+
+		fetchProductsAndCategories()
 	}, [dispatch])
 
 	return (
-		<div className="dark:bg-slate-800">
+		<div className="dark:bg-slate-900 transition-colors duration-300">
 			<HeroSection />
 			<Features />
 			<TrendingProducts />
 			<Banner />
 			<LatestProducts />
-			<br />
+			<div className="py-4" />
 		</div>
 	)
 }

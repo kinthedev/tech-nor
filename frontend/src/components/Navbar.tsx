@@ -16,6 +16,9 @@ const Navbar: FC = () => {
 	const [isMenuOpen, setIsMenuOpen] = useState(false)
 	const cartCount = useAppSelector((state) => state.cartReducer.cartItems.length)
 	const username = useAppSelector((state) => state.authReducer.username)
+	const role = useAppSelector((state) => state.authReducer.role)
+	// Ảnh đại diện Google (nếu đăng nhập bằng Google)
+	const avatar = useAppSelector((state) => state.authReducer.user?.avatar)
 	const isDarkMode = useAppSelector((state) => state.homeReducer.isDarkMode)
 	const { requireAuth } = useAuth()
 
@@ -41,7 +44,7 @@ const Navbar: FC = () => {
 						to="/"
 						className="text-4xl font-bold dark:text-white"
 						data-test="main-logo">
-						Shopify
+						Technor
 					</Link>
 
 					<div className="hidden sm:block">
@@ -61,24 +64,35 @@ const Navbar: FC = () => {
 							data-test="main-categories">
 							Categories
 						</Link>
+						{role === "ADMIN" && (
+							<Link
+								to="/admin"
+								className="text-xl font-bold text-indigo-600 dark:text-indigo-400 hover:opacity-80"
+								data-test="main-admin">
+								Admin
+							</Link>
+						)}
 						<div className="flex items-center">
 							{username !== "" ? (
 								<img
-									src="https://robohash.org/Terry.png?set=set4"
+									src={avatar || "https://robohash.org/Terry.png?set=set4"}
+									referrerPolicy="no-referrer"
 									alt="avatar"
-									className="w-6"
+									className="w-6 h-6 rounded-full object-cover"
 								/>
 							) : (
 								<FaUser className="text-gray-500 text-2xl dark:text-white" />
 							)}
-							<div className="text-gray-500 text-2xl">
+							<div className="text-gray-500 text-2xl ml-1">
 								{username !== "" ? (
 									<CustomPopup />
 								) : (
 									<span
-										className="cursor-pointer hover:opacity-85 dark:text-white"
+										className="cursor-pointer hover:opacity-85 text-base font-semibold dark:text-white text-slate-700"
 										onClick={() => dispatch(updateModal(true))}
-										data-test="login-btn"></span>
+										data-test="login-btn">
+										Login
+									</span>
 								)}
 							</div>
 						</div>
@@ -158,12 +172,23 @@ const Navbar: FC = () => {
 								Categories
 							</Link>
 
+							{role === "ADMIN" && (
+								<Link
+									to="/admin"
+									className="text-2xl font-bold text-indigo-600 dark:text-indigo-400 hover:opacity-80"
+									data-test="main-admin"
+									onClick={handleLinkClick}>
+									Admin Panel
+								</Link>
+							)}
+
 							<div className="flex items-center gap-3">
 								{username !== "" ? (
 									<img
-										src="https://robohash.org/Terry.png?set=set4"
+										src={avatar || "https://robohash.org/Terry.png?set=set4"}
+									referrerPolicy="no-referrer"
 										alt="avatar"
-										className="w-8"
+										className="w-8 h-8 rounded-full object-cover"
 									/>
 								) : (
 									<FaUser className="text-gray-500 text-3xl dark:text-white" />

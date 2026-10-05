@@ -1,18 +1,26 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
-import { type AuthSlice } from "../../models/AuthSlice"
+import { type AuthSlice, type UserProfile } from "../../models/AuthSlice"
 
-interface LoginProps {
-	username: string
-	password: string
+const storedUserStr = localStorage.getItem("user")
+let storedUser: UserProfile | null = null
+if (storedUserStr) {
+	try {
+		storedUser = JSON.parse(storedUserStr)
+	} catch (e) {
+		storedUser = null
+	}
 }
 
+const storedRole = localStorage.getItem("role") || storedUser?.role || "USER"
+const storedUsername =
+	localStorage.getItem("username") || storedUser?.name || storedUser?.email || ""
+
 const initialState: AuthSlice = {
-	isLoggedIn:
-		localStorage.getItem("username") !== null &&
-		localStorage.getItem("username") !== undefined &&
-		localStorage.getItem("username") !== "",
+	isLoggedIn: !!storedUsername,
 	modalOpen: false,
-	username: localStorage.getItem("username") ?? "",
+	username: storedUsername,
+	role: storedRole,
+	user: storedUser,
 }
 
 export const authSlice = createSlice({
@@ -22,28 +30,41 @@ export const authSlice = createSlice({
 		updateModal: (state, action: PayloadAction<boolean>) => {
 			return { ...state, modalOpen: action.payload }
 		},
-		doLogin: (state, action: PayloadAction<LoginProps>) => {
-			if (
-				action.payload.username === "atuny0" &&
-				action.payload.password === "9uQFF1Lh"
-			) {
-				localStorage.setItem("username", "atuny0")
-				return {
-					...state,
-					username: "atuny0",
-					modalOpen: false,
-					isLoggedIn: true,
-				}
-			} else {
-				return state
+
+		loginSuccess: (state, action: PayloadAction<UserProfile>) => {
+			const user = action.payload
+			const role = user.role || "USER"
+			const username = user.name || user.email
+
+			localStorage.setItem("username", username)
+			localStorage.setItem("role", role)
+			localStorage.setItem("user", JSON.stringify(user))
+
+			return {
+				...state,
+				isLoggedIn: true,
+				modalOpen: false,
+				username,
+				role,
+				user,
 			}
 		},
+
 		doLogout: (state) => {
 			localStorage.removeItem("username")
-			return { ...state, username: "", isLoggedIn: false }
+			localStorage.removeItem("role")
+			localStorage.removeItem("user")
+
+			return {
+				...state,
+				username: "",
+				role: "USER",
+				user: null,
+				isLoggedIn: false,
+			}
 		},
 	},
 })
 
-export const { updateModal, doLogin, doLogout } = authSlice.actions
+export const { updateModal, loginSuccess, doLogout } = authSlice.actions
 export default authSlice.reducer

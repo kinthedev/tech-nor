@@ -6,7 +6,7 @@ import { type Product } from "../models/Product"
 interface Props {
 	products: Product[]
 	isLoading: boolean
-	initialRows?: number // скільки рядків показувати спочатку (за замовчуванням 5)
+	initialRows?: number
 }
 
 const getColumnsForWidth = (width: number) => {
@@ -34,7 +34,6 @@ const PaginatedProducts: FC<Props> = ({
 		}
 		if (typeof window !== "undefined") {
 			window.addEventListener("resize", handleResize)
-			// викличемо один раз, щоб впевнитися у правильних колонках
 			handleResize()
 		}
 		return () => {
@@ -43,13 +42,11 @@ const PaginatedProducts: FC<Props> = ({
 		}
 	}, [])
 
-	// Скільки елементів показувати зараз
 	const itemsPerPage = useMemo(() => rowsToShow * columns, [rowsToShow, columns])
 
 	const visibleProducts = products.slice(0, itemsPerPage)
 	const allShown = visibleProducts.length >= products.length
 
-	// клас сітки залишаємо як у вас, щоб стилі відповідали Tailwind breakpoints
 	return (
 		<>
 			{isLoading ? (

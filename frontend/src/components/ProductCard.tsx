@@ -8,20 +8,27 @@ import { AiOutlineShoppingCart } from "react-icons/ai"
 import { Link } from "react-router-dom"
 import PriceSection from "./PriceSection"
 import useAuth from "../hooks/useAuth"
+import { getProductImageUrl } from "../api"
 
 const ProductCard: FC<Product> = ({
 	id,
 	price,
 	thumbnail,
+	image,
 	title,
 	category,
+	brand,
 	rating,
 	discountPercentage,
 }) => {
 	const dispatch = useAppDispatch()
 	const { requireAuth } = useAuth()
 
-	const addCart = () => {
+	const displayImg = getProductImageUrl(image || thumbnail)
+
+	const addCart = (e: React.MouseEvent) => {
+		e.preventDefault()
+		e.stopPropagation()
 		requireAuth(() => {
 			dispatch(
 				addToCart({
@@ -29,54 +36,91 @@ const ProductCard: FC<Product> = ({
 					price,
 					title,
 					category,
+					brand,
 					rating,
-					thumbnail,
+					thumbnail: displayImg,
 					discountPercentage,
 				}),
 			)
-			toast.success("item added to cart successfully", {
-				duration: 3000,
+			toast.success("Đã thêm sản phẩm vào giỏ hàng!", {
+				duration: 2500,
 			})
 		})
 	}
 
 	return (
-		<div className="border border-gray-200 font-lato" data-test="product-card">
-			<div className="text-center border-b border-gray-200">
-				<Link to={{ pathname: `/product/${id}` }}>
+		<div
+			className="group bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700/60 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between font-karla"
+			data-test="product-card">
+			{/* Khung ảnh & Tag giảm giá */}
+			<div className="relative overflow-hidden bg-slate-50 dark:bg-slate-900/50 p-4 flex items-center justify-center h-60">
+				{discountPercentage && discountPercentage > 0 ? (
+					<span className="absolute top-3 left-3 z-10 bg-rose-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-sm">
+						-{Math.round(discountPercentage)}%
+					</span>
+				) : null}
+
+				<Link
+					to={{ pathname: `/product/${id}` }}
+					className="w-full h-full flex items-center justify-center">
 					<img
-						src={thumbnail}
+						src={displayImg}
 						alt={title}
-						className="inline-block h-60 transition-transform duration-200 hover:scale-110"
+						loading="lazy"
+						className="max-h-48 max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
+						onError={(e) => {
+							// Dự phòng nếu ảnh lỗi
+							;(e.target as HTMLImageElement).src = "/placeholder-product.png"
+						}}
 					/>
 				</Link>
 			</div>
-			<div className="px-4 pt-4">
-				<p className="text-gray-500 text-[14px] font-medium dark:text-white">
-					{category}
-				</p>
-				<Link
-					className="font-semibold hover:underline dark:text-white overflow-hidden text-ellipsis whitespace-nowrap block"
-					to={{ pathname: `/product/${id}` }}
-					title={title}>
-					{title}
-				</Link>
-			</div>
-			<div className="px-4">
-				<RatingStar rating={rating} />
-			</div>
-			<div className="flex flex-wrap items-center justify-between px-4 pb-4">
-				{discountPercentage && (
-					<PriceSection discountPercentage={discountPercentage} price={price} />
-				)}
-				<button
-					type="button"
-					className="flex items-center space-x-2 hover:bg-blue-500 text-white py-2 px-4 rounded bg-pink-500"
-					onClick={addCart}
-					data-test="add-cart-btn"
-					title="ADD TO CART">
-					<AiOutlineShoppingCart />
-				</button>
+
+			{/* Thông tin sản phẩm */}
+			<div className="p-4 flex flex-col flex-grow justify-between">
+				<div>
+					{/* Danh mục & Thương hiệu */}
+					<div className="flex items-center justify-between gap-2 mb-1.5">
+						<span className="text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-md">
+							{category}
+						</span>
+						{brand && (
+							<span className="text-xs text-slate-400 dark:text-slate-500 font-medium">
+								{brand}
+							</span>
+						)}
+					</div>
+
+					{/* Tên sản phẩm */}
+					<Link
+						to={{ pathname: `/product/${id}` }}
+						className="font-bold text-slate-800 dark:text-slate-100 hover:text-emerald-600 dark:hover:text-emerald-400 line-clamp-2 text-sm md:text-base leading-snug mb-2 transition-colors"
+						title={title}>
+						{title}
+					</Link>
+				</div>
+
+				{/* Đánh giá sao */}
+				<div className="flex items-center gap-1.5 mb-3">
+					<RatingStar rating={rating} />
+					<span className="text-xs text-slate-400 dark:text-slate-400">
+						({rating.toFixed(1)})
+					</span>
+				</div>
+
+				{/* Giá & Nút Thêm vào giỏ */}
+				<div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-700/60">
+					<PriceSection discountPercentage={discountPercentage ?? 0} price={price} />
+					<button
+						type="button"
+						className="flex items-center justify-center w-10 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white shadow-sm hover:shadow transition-all cursor-pointer"
+						onClick={addCart}
+						data-test="add-cart-btn"
+						title="Thêm vào giỏ hàng"
+						aria-label="Thêm vào giỏ hàng">
+						<AiOutlineShoppingCart size={20} />
+					</button>
+				</div>
 			</div>
 		</div>
 	)

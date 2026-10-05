@@ -1,8 +1,18 @@
 import axiosInstance from "../config/axios"
-import { type LoginDTO, type User } from "../types/auth.type"
+import type { UserProfile } from "../models/AuthSlice"
+
+export interface LoginDTO {
+	email?: string
+	username?: string
+	password?: string
+}
+
 export const authApi = {
-	login: async (credentials: LoginDTO): Promise<User | null> => {
-		const response = await axiosInstance.post<User>("/auth/login", credentials)
+	login: async (credentials: LoginDTO): Promise<UserProfile | null> => {
+		const response = await axiosInstance.post<UserProfile>(
+			"/auth/login",
+			credentials,
+		)
 		return response.data
 	},
 }

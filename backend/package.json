@@ -7,7 +7,8 @@
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"dev": "tsx --watch src/app.ts",
 		"build": "tsc",
-		"start": "node dist/app.js"
+		"start": "node dist/app.js",
+		"seed": "tsx prisma/seed.ts"
 	},
 	"keywords": [],
 	"author": "",
@@ -26,6 +27,7 @@
 		"@prisma/client": "^7.10.0",
 		"cors": "^2.8.6",
 		"dotenv": "^17.4.2",
-		"express": "^5.2.1"
+		"express": "^5.2.1",
+		"google-auth-library": "^11.1.0"
 	}
 }

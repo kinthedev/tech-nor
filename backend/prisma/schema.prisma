@@ -8,9 +8,34 @@ datasource db {
 }
 
 model User { 
-  id    Int     @id @default(autoincrement()) 
-  email String  @unique
-  password String
-  name  String?
-  address String?
+  id       Int     @id @default(autoincrement()) 
+  email    String  @unique
+  password String? // NULL với tài khoản chỉ đăng nhập bằng Google
+  name     String?
+  address  String?
+  role     String  @default("USER") @db.VarChar(50)
+
+  // ===== Đăng nhập bằng Google (Gmail) =====
+  googleId String? @unique @db.VarChar(255) // "sub" trong ID token của Google - định danh duy nhất, không đổi
+  avatar   String? @db.VarChar(500) // Ảnh đại diện lấy từ Google ("picture")
+  provider String  @default("LOCAL") @db.VarChar(20) // LOCAL | GOOGLE | LOCAL_GOOGLE
+
+  @@map("users")
 } 
+
+model Product {
+  id                 Int      @id @default(autoincrement())
+  title              String   @db.VarChar(255)
+  image              String?  @db.VarChar(500)
+  price              Decimal  @db.Decimal(10, 2)
+  rating             Float    @default(0.0)
+  description        String?  @db.Text
+  category           String   @db.VarChar(100)
+  brand              String?  @db.VarChar(100)
+  stock              Int?     @default(0)
+  discountPercentage Float?   @default(0.0)
+  createdAt          DateTime @default(now()) @db.Timestamp(0)
+  updatedAt          DateTime @default(dbgenerated("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")) @updatedAt @db.Timestamp(0)
+
+  @@map("products")
+}
