@@ -1,5 +1,5 @@
 import express, { type Request, type Response } from "express"
-import rootRouter from "./routes/index.ts"
+import rootRouter from "./routes/index"
 import cors from "cors"
 import path from "path"
 const app = express()
