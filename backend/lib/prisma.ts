@@ -1,8 +1,4 @@
-import dotenv from "dotenv";
-dotenv.config();
-dotenv.config({ path: "../.env" });
-dotenv.config({ path: "/etc/secrets/.env" });
-
+import "dotenv/config";
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import { PrismaClient } from "../generated/prisma/client.js";
 
@@ -12,12 +8,7 @@ function clean(val?: string) {
 }
 
 function createDbAdapter() {
-  const envKeys = Object.keys(process.env).filter(
-    (k) => !k.startsWith("npm_") && !k.startsWith("NODE_")
-  );
-  console.log("Render Service Name:", process.env.RENDER_SERVICE_NAME || "not set");
-  console.log("Visible environment keys:", envKeys.join(", "));
-
+  // Đọc trực tiếp từ biến môi trường hệ thống của Render
   const rawUrl = clean(process.env.DATABASE_URL);
   let host = clean(process.env.DATABASE_HOST);
   let port = Number(clean(process.env.DATABASE_PORT)) || 4000;
@@ -35,16 +26,9 @@ function createDbAdapter() {
       password = decodeURIComponent(parsed.password);
       database = parsed.pathname.replace(/^\//, "");
     } catch (e) {
-      console.warn("Could not parse DATABASE_URL, falling back to individual variables:", e);
+      console.warn("Không thể parse DATABASE_URL, dùng các biến rời:", e);
     }
   }
-
-  console.log("DB connection params:", {
-    host: host ? "✓ present" : "✗ missing",
-    port,
-    user: user ? "✓ present" : "✗ missing",
-    database: database ? "✓ present" : "✗ missing",
-  });
 
   if (!host || !user || !database) {
     throw new Error(
@@ -59,7 +43,7 @@ function createDbAdapter() {
     password: password || "",
     database,
     ssl: {
-      rejectUnauthorized: true,
+      rejectUnauthorized: true, // TiDB Cloud bắt buộc bật SSL
     },
     connectTimeout: 15000,
   });
