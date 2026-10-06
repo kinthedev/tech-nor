@@ -6,7 +6,7 @@
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"dev": "tsx --watch src/app.ts",
-		"build": "tsup src/app.ts --format esm --clean",
+		"build": "tsup src/app.ts --format esm --clean --external @prisma/client --external @prisma/adapter-mariadb",
 		"start": "node dist/app.js",
 		"seed": "tsx prisma/seed.ts"
 	},
