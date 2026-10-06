@@ -1,14 +1,29 @@
-import "dotenv/config"
-import { PrismaMariaDb } from "@prisma/adapter-mariadb"
-import { PrismaClient } from "../generated/prisma/client"
+import "dotenv/config";
+import mariadb from "mariadb";
+import { PrismaMariaDb } from "@prisma/adapter-mariadb";
+import { PrismaClient } from "../generated/prisma/client.js";
 
-const adapter = new PrismaMariaDb({
-	host: process.env.DATABASE_HOST || "",
-	user: process.env.DATABASE_USER || "",
-	password: process.env.DATABASE_PASSWORD || "",
-	database: process.env.DATABASE_NAME || "",
-	connectionLimit: 5,
-})
-const prisma = new PrismaClient({ adapter })
+function createDbPool() {
+  const rawUrl = process.env.DATABASE_URL;
+  if (!rawUrl) {
+    throw new Error("DATABASE_URL is not defined in environment variables");
+  }
 
-export { prisma }
+  const parsed = new URL(rawUrl.replace(/^mysql:\/\//, "http://"));
+
+  return mariadb.createPool({
+    host: parsed.hostname,
+    port: Number(parsed.port) || 4000,
+    user: decodeURIComponent(parsed.username),
+    password: decodeURIComponent(parsed.password),
+    database: parsed.pathname.replace(/^\//, ""),
+    ssl: {
+      rejectUnauthorized: true,
+    },
+    connectTimeout: 15000,
+  });
+}
+
+const pool = createDbPool();
+const adapter = new PrismaMariaDb(pool);
+export const prisma = new PrismaClient({ adapter });
