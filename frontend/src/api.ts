@@ -1,4 +1,4 @@
-export const BACKEND_URL = "http://localhost:5000"
+export const BACKEND_URL = "https://tech-nor.onrender.com"
 const BASE_URL = `${BACKEND_URL}/api/v1`
 
 export const API_ENDPOINTS = {
