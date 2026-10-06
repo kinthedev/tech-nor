@@ -6,7 +6,16 @@ function clean(val?: string) {
   if (!val) return undefined;
   return val.trim().replace(/^["']|["']$/g, "").trim();
 }
+console.log("=== DATABASE ENV DEBUG ===");
 
+console.log({
+  DATABASE_URL: Boolean(process.env.DATABASE_URL),
+  DATABASE_HOST: Boolean(process.env.DATABASE_HOST),
+  DATABASE_NAME: Boolean(process.env.DATABASE_NAME),
+  DATABASE_USER: Boolean(process.env.DATABASE_USER),
+  DATABASE_PASSWORD: Boolean(process.env.DATABASE_PASSWORD),
+  DATABASE_PORT: Boolean(process.env.DATABASE_PORT),
+});
 function createDbAdapter() {
   // Đọc trực tiếp từ biến môi trường hệ thống của Render
   const rawUrl = clean(process.env.DATABASE_URL);
