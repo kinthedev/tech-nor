@@ -31,8 +31,15 @@ function createDbAdapter() {
   }
 
   if (!host || !user || !database) {
+    const receivedKeys = Object.keys(process.env).filter(
+      (k) => !k.startsWith("npm_") && !k.startsWith("NODE_")
+    );
     throw new Error(
-      "Database configuration is missing. Please ensure DATABASE_URL or (DATABASE_HOST, DATABASE_USER, DATABASE_NAME) are properly set in Render Environment Variables."
+      `Database configuration is missing!\n` +
+      `  • Render Service Name đang chạy: "${process.env.RENDER_SERVICE_NAME || "UNKNOWN"}"\n` +
+      `  • Render Service ID: "${process.env.RENDER_SERVICE_ID || "UNKNOWN"}"\n` +
+      `  • Các biến môi trường Node nhận được từ Render: [${receivedKeys.join(", ")}]\n` +
+      `  • Cảnh báo: Biến DATABASE_URL hoặc (DATABASE_HOST, DATABASE_USER, DATABASE_NAME) chưa có trong Service "${process.env.RENDER_SERVICE_NAME || "này"}"!`
     );
   }
 
