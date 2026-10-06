@@ -1,4 +1,8 @@
-import "dotenv/config";
+import dotenv from "dotenv";
+dotenv.config();
+dotenv.config({ path: "../.env" });
+dotenv.config({ path: "/etc/secrets/.env" });
+
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import { PrismaClient } from "../generated/prisma/client.js";
 
@@ -8,6 +12,12 @@ function clean(val?: string) {
 }
 
 function createDbAdapter() {
+  const envKeys = Object.keys(process.env).filter(
+    (k) => !k.startsWith("npm_") && !k.startsWith("NODE_")
+  );
+  console.log("Render Service Name:", process.env.RENDER_SERVICE_NAME || "not set");
+  console.log("Visible environment keys:", envKeys.join(", "));
+
   const rawUrl = clean(process.env.DATABASE_URL);
   let host = clean(process.env.DATABASE_HOST);
   let port = Number(clean(process.env.DATABASE_PORT)) || 4000;
